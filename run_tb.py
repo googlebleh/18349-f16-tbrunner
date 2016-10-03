@@ -18,9 +18,16 @@ from __future__ import print_function
 import sys
 import os
 import time
+import re
 import subprocess
 from argparse import ArgumentParser
+from getpass import getuser
 from glob import glob
+
+try:  # python version probably > 3.3
+    from shlex import quote as cmd_quote
+except ImportError:  # backwards compatibility
+    from pipes import quote as cmd_quote
 
 ##
 ## @brief      Target-dependent configuration.
@@ -29,19 +36,9 @@ ftditerm_path = "/home/cw/Downloads/software_setup/18349/ftditerm/ftditerm.py"
 ftditerm_baud = 115200
 
 ##
-## More config. Modify this if you know what you're doing.
-##
-maker = "make"  # some people may need to specify `gmake`
-openocd_cmd = [maker, "openocd"]
-FS_XTERM_BASE = ["xterm", "-e"]  # append args
-FORK_SHELL = FS_XTERM_BASE
-openocd_cmd_349 = "openocd -f 349util/rpi2.cfg"
-oocd_cmd_regex_str = re.escape(openocd_cmd_349)
-oocd_cmd_regex = re.compile(oocd_cmd_regex_str, re.MULTILINE)
-
-##
 ## Preprocessing: determine some info about the current environment
 ##
+username = os.environ["SUDO_USER"]  # I hope this works on macs too
 git_repo_root = subprocess.Popen(["git", "rev-parse", "--show-toplevel"],
                                  stdout=subprocess.PIPE)
 git_repo_root.wait()
@@ -50,6 +47,26 @@ make_root = os.path.join(proj_root, "code")
 
 kernel_dpaths = glob(os.path.join(make_root, "kernel*"))
 proj_names = list(map(os.path.basename, kernel_dpaths))
+
+##
+## More config. Modify this if you know what you're doing.
+##
+make_cmd = ["make", "-C", make_root]  # people may need to specify `gmake`
+openocd_cmd = make_cmd + ["openocd"]
+FS_XTERM_BASE = ["xterm", "-e"]  # append args
+FORK_SHELL = FS_XTERM_BASE
+
+openocd_cmd_349 = "openocd -f 349util/rpi2.cfg"
+oocd_cmd_regex_str = re.escape(openocd_cmd_349)
+oocd_cmd_regex = re.compile(oocd_cmd_regex_str, re.MULTILINE)
+
+def openocd_wait(p, timeout=60):
+    st = time.time()
+    while ((time.time() - st) < timeout):
+        (stdout_data, _) = p.communicate()
+        if oocd_cmd_regex.search(stdout_data):
+            return 0
+    return -1
 
 
 def parse_args():
@@ -70,21 +87,24 @@ def main():
         return 1
 
     args = parse_args()
+    raw_input("Continue?")
 
     # setup commands
     ftditerm_cmd = [ftditerm_path, "-b", str(ftditerm_baud)]
-    gdb_cmd = [maker, "PROJECT=" + args.project, "gdb"]
-    gdb_cmd = ["python"]
+    gdb_cmd = make_cmd + ["PROJECT=" + args.project, "gdb"]
 
     ftditerm_p = subprocess.Popen(FORK_SHELL + ftditerm_cmd)
     openocd_p = subprocess.Popen(FORK_SHELL + openocd_cmd)
 
-    time.sleep(15)
     # for loop, oocd_cmd_regex.match(output)
 
-    gdb_p = subprocess.Popen(FORK_SHELL + gdb_cmd)
+    oc = FORK_SHELL + gdb_cmd
+    c = ["sudo", , username] + oc
+    print(c)
+    time.sleep(15)
+    gdb_p = subprocess.Popen(c, shell=True)
 
-    input("--> ")
+    raw_input("--> ")
 
     openocd_p.poll()
     if openocd_p.returncode is None:
