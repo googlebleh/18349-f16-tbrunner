@@ -38,7 +38,6 @@ ftditerm_baud = 115200
 ##
 ## Preprocessing: determine some info about the current environment
 ##
-username = os.environ["SUDO_USER"]  # I hope this works on macs too
 git_repo_root = subprocess.Popen(["git", "rev-parse", "--show-toplevel"],
                                  stdout=subprocess.PIPE)
 git_repo_root.wait()
@@ -79,27 +78,17 @@ def parse_args():
 
 
 def main():
-    # check usage
-    if os.getuid() != 0:
-        err_str = "ERROR: root permissions required to run 18-349 testbench"
-        print(err_str, file=sys.stderr)
-        print("usage: sudo", __file__, file=sys.stderr)
-        return 1
-
     args = parse_args()
-
-    # os.environ["PATH"] += os.pathsep + "/home/cw/Downloads/software_setup/18349/gcc-arm-none-eabi-4_9-2015q2/bin"
 
     # setup commands
     ftditerm_cmd = [ftditerm_path, "-b", str(ftditerm_baud)]
     gdb_cmd = make_cmd + ["PROJECT=" + args.project, "gdb"]
 
-    # ftditerm_p = subprocess.Popen(FORK_SHELL + ftditerm_cmd)
-    # openocd_p = subprocess.Popen(FORK_SHELL + openocd_cmd)
+    ftditerm_p = subprocess.Popen(["sudo"] + FORK_SHELL + ftditerm_cmd)
+    openocd_p = subprocess.Popen(["sudo"] + FORK_SHELL + openocd_cmd)
 
-    c = ["sudo", "-i", "-u", username] + gdb_cmd #["make", "-C", "/home/cw/Scripts"]
-    # time.sleep(15)
-    gdb_p = subprocess.run(c, env=os.environ)
+    time.sleep(15)
+    gdb_p = subprocess.run(gdb_cmd)
 
     input("--> ")
 
