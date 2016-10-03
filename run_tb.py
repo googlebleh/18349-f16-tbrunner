@@ -87,24 +87,21 @@ def main():
         return 1
 
     args = parse_args()
-    raw_input("Continue?")
+
+    # os.environ["PATH"] += os.pathsep + "/home/cw/Downloads/software_setup/18349/gcc-arm-none-eabi-4_9-2015q2/bin"
 
     # setup commands
     ftditerm_cmd = [ftditerm_path, "-b", str(ftditerm_baud)]
     gdb_cmd = make_cmd + ["PROJECT=" + args.project, "gdb"]
 
-    ftditerm_p = subprocess.Popen(FORK_SHELL + ftditerm_cmd)
-    openocd_p = subprocess.Popen(FORK_SHELL + openocd_cmd)
+    # ftditerm_p = subprocess.Popen(FORK_SHELL + ftditerm_cmd)
+    # openocd_p = subprocess.Popen(FORK_SHELL + openocd_cmd)
 
-    # for loop, oocd_cmd_regex.match(output)
+    c = ["sudo", "-i", "-u", username] + gdb_cmd #["make", "-C", "/home/cw/Scripts"]
+    # time.sleep(15)
+    gdb_p = subprocess.run(c, env=os.environ)
 
-    oc = FORK_SHELL + gdb_cmd
-    c = ["sudo", , username] + oc
-    print(c)
-    time.sleep(15)
-    gdb_p = subprocess.Popen(c, shell=True)
-
-    raw_input("--> ")
+    input("--> ")
 
     openocd_p.poll()
     if openocd_p.returncode is None:
