@@ -6,7 +6,6 @@
 ## @author     Colin Wee <cwee@andrew.cmu.edu>
 ##
 ## @todo Implement missing command-line args
-## @todo convert xterm to start_new_session=True
 ##
 
 from __future__ import print_function
@@ -47,21 +46,34 @@ except ImportError:  # backwards compatibility
 ##             about where the config files were stored.
 ##
 USER_CONFIG = {
-    "ftditerm baudrate" : 115200,
+    "FTDITerm Baudrate": 115200,
     "OpenOCD timeout": 40,  ##< Max number of seconds to wait for OpenOCD
 }
 
 
+##
+## @brief      Kill a process as root.
+## @param      pid   PID of the process to kill
+## @return     Exit code of `kill`
+##
 def sudo_kill(pid):
     cmd = ["sudo", "kill", str(pid)]
     print(' '.join(cmd))
-    subprocess.Popen(cmd).wait()
+    kill_p = subprocess.Popen(cmd)
+    kill_p.wait()
+    return kill_p.returncode
 
 
+##
+## @brief      Kill a process as root.
+## @param      p     subprocess.Popen object representing a process.
+## @return     Exit code of `kill`, or None if the process is no longer
+##             running.
+##
 def sudo_kill_popen(p):
     if p.poll() is None:
         # TOCTTOU
-        sudo_kill(p.pid)
+        return sudo_kill(p.pid)
 
 
 class TBRunner:
@@ -114,7 +126,7 @@ class TBRunner:
 
         proj_root = git_repo_root.stdout.read().decode().strip()
         make_root = os.path.join(proj_root, "code")
-        self.make_cmd = [TBRunner.MAKER, "-C", make_root, "--debug=j"]
+        self.make_cmd = [TBRunner.MAKER, "-C", make_root]#, "--debug=j"]
 
         kernel_dpaths = glob(os.path.join(make_root, "kernel*"))
         self.proj_names = list(map(os.path.basename, kernel_dpaths))
@@ -131,10 +143,13 @@ class TBRunner:
         while ((time.time() - start_time) < self.openocd_timeout):
             try:
                 stdout_data = stdout.readline().decode()
-                if TBRunner.OOCD_CMD_REGEX.match(stdout_data.strip()):
-                    return 0
+
             except UnicodeDecodeError:
                 pass  # this isn't the line we're looking for
+
+            else:
+                if TBRunner.OOCD_CMD_REGEX.match(stdout_data.strip()):
+                    return 0
         return -1
 
     ##
@@ -145,11 +160,6 @@ class TBRunner:
     def parse_args(self, argv):
         long_desc = "Run the testbench for 18-349's RPi/JTAG setup."
         ap = ArgumentParser(description=long_desc)
-
-        ap.add_argument("-i", "--interactive", action="store_true",
-                        help="Enable debugging in GDB"                      \
-                             " (instead of exiting as soon as execution"    \
-                             " halts)")
 
         ap.add_argument("--log",
                         help="File to copy ftditerm output to")
@@ -166,7 +176,7 @@ class TBRunner:
     ## @todo Add error-checking.
     ##
     def process_cfg(self, user_cfg):
-        self.ftditerm_baud = user_cfg["ftditerm baudrate"]
+        self.ftditerm_baud = user_cfg["FTDITerm Baudrate"]
         self.openocd_timeout = user_cfg["OpenOCD timeout"]
 
     ##
@@ -179,6 +189,7 @@ class TBRunner:
             print("  Follow instructions in Appendix A of Lab 0 handout",
                   file=sys.stderr)
             sys.exit(-1)
+
         base_cmd = [TBRunner.FTDITERM_FPATH, "-b", str(self.ftditerm_baud)]
         self.ftditerm_cmd = ["sudo"] + self.newshell(base_cmd)
         # OpenOCD
@@ -199,19 +210,11 @@ class TBRunner:
             print("ERROR: OpenOCD not ready within", self.openocd_timeout,
                   "seconds", file=sys.stderr)
             return 1
-
-        gdb_p = subprocess.Popen(self.gdb_cmd, stdin=subprocess.PIPE,
-                                 universal_newlines=True)
-        if not self.args.interactive:
-            gdb_p.stdin.write(TBRunner.GDB_INPUT_STR)
-            # gdb_p.communicate(TBRunner.GDB_INPUT_STR)  # sick hack bro
-            # try:
-            # except TimeoutExpired:
-            #     gdb_p.kill()
-            #     gdb_p.communicate()
+        gdb_p = subprocess.Popen(self.gdb_cmd)
 
         try:
             openocd_p.wait()
+
         except KeyboardInterrupt:
             prog_name = os.path.basename(__file__)
             print()  # clear any garbage on this line
