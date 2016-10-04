@@ -115,18 +115,17 @@ class TBRunner:
     ##             environment
     ##
     def prepare_runtime(self):
-        git_cmd = ["git", "rev-parse", "--show-toplevel"]
-        git_repo_root = subprocess.Popen(git_cmd,
-                                         stdout=subprocess.PIPE,
-                                         universal_newlines=True)
-        git_repo_root_outp, _ = git_repo_root.communicate()
-        if git_repo_root.returncode:
+        repo_root = subprocess.Popen(["git", "rev-parse", "--show-toplevel"],
+                                     stdout=subprocess.PIPE,
+                                     universal_newlines=True)
+        repo_root_outp, _ = repo_root.communicate()
+        if repo_root.returncode:
             prog_name = os.path.basename(__file__)
-            print("ERROR:", prog_name,
-                  "must be run from within 349 git repo", file=sys.stderr)
+            print("ERROR:", prog_name, "must be run from within 349 git repo",
+                  file=sys.stderr)
             sys.exit(128)
 
-        proj_root = git_repo_root_outp.strip()
+        proj_root = repo_root_outp.strip()
         make_root = os.path.join(proj_root, "code")
         self.make_cmd = [TBRunner.MAKER, "-C", make_root]
 
@@ -162,14 +161,11 @@ class TBRunner:
     def parse_args(self, argv):
         long_desc = "Run the testbench for 18-349's RPi/JTAG setup."
         ap = ArgumentParser(description=long_desc)
-
-        ap.add_argument("--log",
+        ap.add_argument("-l", "--log",
                         help="UNIMPLEMENTED: Write ftditerm output to file.")
-
         ap.add_argument("-p", "--project", default="kernel",
                         choices=self.proj_names,
                         help="specify PROJECT variable to make")
-
         self.args = ap.parse_args(argv)
 
     ##
@@ -197,15 +193,14 @@ class TBRunner:
         # OpenOCD
         self.openocd_cmd = ["sudo"] + self.make_cmd + ["openocd"]
         # GDB
-        gdb_base_cmd = self.make_cmd + ["PROJECT=" + self.args.project, "gdb"]
-        self.gdb_cmd = self.newshell(gdb_base_cmd)
+        base_cmd = self.make_cmd + ["PROJECT=" + self.args.project, "gdb"]
+        self.gdb_cmd = self.newshell(base_cmd)
 
     def run(self):
         ftditerm_p = subprocess.Popen(self.ftditerm_cmd)
         openocd_p = subprocess.Popen(self.openocd_cmd,
                                      stdout=subprocess.PIPE,
                                      universal_newlines=True)
-
         # cleanup on exit
         atexit.register(sudo_kill_popen, openocd_p)
         atexit.register(sudo_kill_popen, ftditerm_p)
