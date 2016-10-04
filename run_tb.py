@@ -106,6 +106,11 @@ class TBRunner:
         git_cmd = ["git", "rev-parse", "--show-toplevel"]
         git_repo_root = subprocess.Popen(git_cmd, stdout=subprocess.PIPE)
         git_repo_root.wait()
+        if git_repo_root.returncode:
+            prog_name = os.path.basename(__file__)
+            print("ERROR:", prog_name,
+                  "must be run from within 349 git repo", file=sys.stderr)
+            sys.exit(128)
 
         proj_root = git_repo_root.stdout.read().decode().strip()
         make_root = os.path.join(proj_root, "code")
