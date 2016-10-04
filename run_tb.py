@@ -116,17 +116,19 @@ class TBRunner:
     ##
     def prepare_runtime(self):
         git_cmd = ["git", "rev-parse", "--show-toplevel"]
-        git_repo_root = subprocess.Popen(git_cmd, stdout=subprocess.PIPE)
-        git_repo_root.wait()
+        git_repo_root = subprocess.Popen(git_cmd,
+                                         stdout=subprocess.PIPE,
+                                         universal_newlines=True)
+        git_repo_root_outp, _ = git_repo_root.communicate()
         if git_repo_root.returncode:
             prog_name = os.path.basename(__file__)
             print("ERROR:", prog_name,
                   "must be run from within 349 git repo", file=sys.stderr)
             sys.exit(128)
 
-        proj_root = git_repo_root.stdout.read().decode().strip()
+        proj_root = git_repo_root_outp.strip()
         make_root = os.path.join(proj_root, "code")
-        self.make_cmd = [TBRunner.MAKER, "-C", make_root]#, "--debug=j"]
+        self.make_cmd = [TBRunner.MAKER, "-C", make_root]
 
         kernel_dpaths = glob(os.path.join(make_root, "kernel*"))
         self.proj_names = list(map(os.path.basename, kernel_dpaths))
@@ -142,7 +144,7 @@ class TBRunner:
         start_time = time.time()
         while ((time.time() - start_time) < self.openocd_timeout):
             try:
-                stdout_data = stdout.readline().decode()
+                stdout_data = stdout.readline()
 
             except UnicodeDecodeError:
                 pass  # this isn't the line we're looking for
@@ -162,7 +164,7 @@ class TBRunner:
         ap = ArgumentParser(description=long_desc)
 
         ap.add_argument("--log",
-                        help="File to copy ftditerm output to")
+                        help="UNIMPLEMENTED: Write ftditerm output to file.")
 
         ap.add_argument("-p", "--project", default="kernel",
                         choices=self.proj_names,
@@ -200,7 +202,9 @@ class TBRunner:
 
     def run(self):
         ftditerm_p = subprocess.Popen(self.ftditerm_cmd)
-        openocd_p = subprocess.Popen(self.openocd_cmd, stdout=subprocess.PIPE)
+        openocd_p = subprocess.Popen(self.openocd_cmd,
+                                     stdout=subprocess.PIPE,
+                                     universal_newlines=True)
 
         # cleanup on exit
         atexit.register(sudo_kill_popen, openocd_p)
