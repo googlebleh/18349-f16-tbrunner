@@ -122,12 +122,14 @@ class TBRunner:
     ##             the timeout was reached.
     ##
     def openocd_wait(self, stdout):
-        # stdout.seek(0)
         start_time = time.time()
         while ((time.time() - start_time) < self.openocd_timeout):
-            stdout_data = stdout.readline()
-            if TBRunner.OOCD_CMD_REGEX.match(stdout_data.strip()):
-                return 0
+            try:
+                stdout_data = stdout.readline().decode()
+                if TBRunner.OOCD_CMD_REGEX.match(stdout_data.strip()):
+                    return 0
+            except UnicodeDecodeError:
+                pass  # this isn't the line we're looking for
         return -1
 
     ##
