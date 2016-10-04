@@ -161,7 +161,7 @@ class TBRunner:
     def parse_args(self, argv):
         long_desc = "Run the testbench for 18-349's RPi/JTAG setup."
         ap = ArgumentParser(description=long_desc)
-        ap.add_argument("-l", "--log",
+        ap.add_argument("-l", "--logfile",
                         help="UNIMPLEMENTED: Write ftditerm output to file.")
         ap.add_argument("-p", "--project", default="kernel",
                         choices=self.proj_names,
