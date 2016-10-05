@@ -5,8 +5,10 @@
 ## @brief      Run the testbench for 18-349's RPi/JTAG setup.
 ## @author     Colin Wee <cwee@andrew.cmu.edu>
 ##
-## @todo Implement commented command-line args
+## @todo Add capability to be run from anywhere (and specify repo path)
+## @todo Implement commented command-line args.
 ## @todo Check for existing FTDITerm sessions before launching.
+## @todo Run FTDITerm by imports rather than by invoking its script.
 ##
 ## @details    On the choice of xterm as the terminal emulator,
 ##             I simply chose it for its availability. It should be
