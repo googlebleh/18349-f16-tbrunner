@@ -10,6 +10,7 @@ An environment set up to run 18-349's testbench setup. See the **Lab 0
 Usage
 -----
 This script can be run from anywhere in the 349-f16 repository.
+
     usage: run_tb.py [-h] [-l LOGFILE] [-p {}]
 
     Run the testbench for 18-349's RPi/JTAG setup.
@@ -20,7 +21,7 @@ This script can be run from anywhere in the 349-f16 repository.
       -p, --project {kernel,kernel_blink,kernel_optimization}
                             specify PROJECT variable to make
 
-Other usage notes:
+Other usage notes
 ------------------
 Running the script will create new terminal windows for FTDITerm and
     GDB. OpenOCD's output is visible in the same window from which the
@@ -39,7 +40,7 @@ Finally, the script contains a global mapping called `USER_CONFIG`
     Please do not delete any entries from this mapping; simply edit
     the values as necessary.
 
-Expert mode:
+Expert mode
 ------------
 See the block comment labeled `Internal config` in the source.
 
