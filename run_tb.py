@@ -5,7 +5,14 @@
 ## @brief      Run the testbench for 18-349's RPi/JTAG setup.
 ## @author     Colin Wee <cwee@andrew.cmu.edu>
 ##
-## @todo Implement missing command-line args
+## @todo Implement commented command-line args
+## @todo Check for existing FTDITerm sessions before launching.
+##
+## @details    On the choice of xterm as the terminal emulator,
+##             I simply chose it for its availability. It should be
+##             included in most Linux distros, and I believe it's
+##             included in the Mac setup too. This can be configured
+##             by the TBRunner.FS_XTERM_BASE attribute.
 ##
 
 from __future__ import print_function
@@ -161,6 +168,8 @@ class TBRunner:
     def parse_args(self, argv):
         long_desc = "Run the testbench for 18-349's RPi/JTAG setup."
         ap = ArgumentParser(description=long_desc)
+        # ap.add_argument("-f", "--no-ftdi", action="store_true",
+        #                 help="Don't start a new FTDITerm session")
         ap.add_argument("-l", "--logfile",
                         help="UNIMPLEMENTED: Write ftditerm output to file.")
         ap.add_argument("-p", "--project", default="kernel",
