@@ -27,9 +27,7 @@ import time
 import re
 import subprocess
 from argparse import ArgumentParser
-from getpass import getuser
 from glob import glob
-from tempfile import TemporaryFile
 
 try:  # python version probably > 3.3
     from shlex import quote as cmd_quote
