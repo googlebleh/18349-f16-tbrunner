@@ -46,4 +46,4 @@ Expert mode
 See the block comment labeled `Internal config` in the source.
 
 In order to run FTDITerm and GDB in an alternative terminal emulator,
-    edit `TBRunner.FS_XTERM_BASE` accordingly.
+    edit `TBRunner.FORK_SHELL` accordingly.

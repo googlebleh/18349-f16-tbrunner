@@ -14,7 +14,7 @@
 ##             I simply chose it for its availability. It should be
 ##             included in most Linux distros, and I believe it's
 ##             included in the Mac setup too. This can be configured
-##             by the TBRunner.FS_XTERM_BASE attribute.
+##             by the TBRunner.FORK_SHELL attribute.
 ##
 
 from __future__ import print_function
