@@ -11,7 +11,7 @@ Usage
 -----
 This script can be run from anywhere in the 349-f16 repository.
 
-    usage: run_tb.py [-h] [-l LOGFILE] [-p {}]
+    usage: run_tb.py [-h] [-l LOGFILE] [-p {kernel,kernel_blink,kernel_optimization}]
 
     Run the testbench for 18-349's RPi/JTAG setup.
 
