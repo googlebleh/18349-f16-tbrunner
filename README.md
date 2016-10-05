@@ -1,6 +1,6 @@
 18349-f16-tbrunner
 ==================
-Script to manage the 18-349 testbench
+Script to manage the 18-349 testbench.
 
 Usage
 -----
@@ -16,9 +16,9 @@ Usage
 
 Other usage notes:
 ------------------
-Running the script will create new xterm windows for FTDITerm and
-    gdb. OpenOCD's output is visible from the same window from
-    which you invoked the script.
+Running the script will create new terminal windows for FTDITerm and
+    gdb. OpenOCD's output is visible in the same window from which you
+    invoked the script.
 
 In order to close all the windows, you simply need to exit the
     script. This can be safely done with `^C` while the original
