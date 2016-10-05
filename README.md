@@ -34,7 +34,14 @@ NOTE: This has not been tested in the VM, but because of how
     OpenOCD is run, sending a `^C` to the original window can
     effectively close OpenOCD.
 
+Finally, the script contains a global mapping called `USER_CONFIG`
+    containing some parameters which may (rarely) need changing.
+    Please do not delete any entries from this mapping; simply edit
+    the values as necessary.
+
 Expert mode:
 ------------
+See the block comment labeled `Internal config` in the source.
+
 In order to run FTDITerm and GDB in an alternative terminal emulator,
     edit `TBRunner.FS_XTERM_BASE` accordingly.
