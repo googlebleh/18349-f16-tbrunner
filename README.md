@@ -4,7 +4,8 @@ Script to manage the 18-349 testbench.
 
 Prerequisites
 -------------
-An environment set up to run 18-349's testbench setup. See the **Lab 0
+- Python >= 2.7
+- An environment set up to run 18-349's testbench setup. See the **Lab 0
     handout, Appendix A** for detailed setup instructions.
 
 Usage
