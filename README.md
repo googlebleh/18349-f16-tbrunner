@@ -21,15 +21,15 @@ Running the script will create new xterm windows for FTDITerm and
     which you invoked the script.
 
 In order to close all the windows, you simply need to exit the
-    script. This can be safely done with ^C while the original
+    script. This can be safely done with `^C` while the original
     window which ran the script is in focus. This is the same
     window that shows OpenOCD's output. Alternatively, you may
     close windows individually.
-    NOTE: This has not been tested in the VM, but because of how
-        OpenOCD is run, you may be able to effectively use ^C to
-        close OpenOCD.
+NOTE: This has not been tested in the VM, but because of how
+    OpenOCD is run, you may be able to effectively use `^C` to
+    close OpenOCD.
 
 Expert mode:
 ------------
 In order to run FTDITerm and GDB in your favorite terminal
-    emulator, you should edit TBRunner.FS_XTERM_BASE
+    emulator, you should edit `TBRunner.FS_XTERM_BASE`
