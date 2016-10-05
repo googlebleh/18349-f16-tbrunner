@@ -2,8 +2,14 @@
 ==================
 Script to manage the 18-349 testbench.
 
+Prerequisites
+-------------
+An environment set up to run 18-349's testbench setup. See the **Lab 0
+    handout, Appendix A** for detailed setup instructions.
+
 Usage
 -----
+This script can be run from anywhere in the 349-f16 repository.
     usage: run_tb.py [-h] [-l LOGFILE] [-p {}]
 
     Run the testbench for 18-349's RPi/JTAG setup.
