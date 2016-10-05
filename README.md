@@ -17,19 +17,18 @@ Usage
 Other usage notes:
 ------------------
 Running the script will create new terminal windows for FTDITerm and
-    gdb. OpenOCD's output is visible in the same window from which you
-    invoked the script.
+    GDB. OpenOCD's output is visible in the same window from which the
+    script was invoked.
 
-In order to close all the windows, you simply need to exit the
-    script. This can be safely done with `^C` while the original
-    window which ran the script is in focus. This is the same
-    window that shows OpenOCD's output. Alternatively, you may
-    close windows individually.
+In order to close all the windows, simply exit the script. This can be
+    safely done with `^C` while the original window which ran the
+    script is in focus. This is the same window that shows OpenOCD's
+    output. Alternatively, each window may be closed individually.
 NOTE: This has not been tested in the VM, but because of how
-    OpenOCD is run, you may be able to effectively use `^C` to
-    close OpenOCD.
+    OpenOCD is run, sending a `^C` to the original window can
+    effectively close OpenOCD.
 
 Expert mode:
 ------------
-In order to run FTDITerm and GDB in your favorite terminal
-    emulator, you should edit `TBRunner.FS_XTERM_BASE`
+In order to run FTDITerm and GDB in an alternative terminal emulator,
+    edit `TBRunner.FS_XTERM_BASE` accordingly.
