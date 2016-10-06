@@ -25,6 +25,7 @@ import os
 import atexit
 import time
 import re
+import itertools  # different between Python 2 and 3
 import subprocess
 from argparse import ArgumentParser
 from glob import glob
@@ -32,6 +33,14 @@ from glob import glob
 try:  # python version probably > 3.3
     from shlex import quote as cmd_quote
     from shutil import which
+
+    def partition(pred, iterable):
+        'Use a predicate to partition entries into false and true entries'
+        # partition(is_odd, range(10)) --> 0 2 4 6 8   and  1 3 5 7 9
+        # https://docs.python.org/dev/library/itertools.html#itertools-recipes
+        t1, t2 = itertools.tee(iterable)
+        return itertools.filterfalse(pred, t1), filter(pred, t2)
+
 except ImportError:  # backwards compatibility
     from pipes import quote as cmd_quote
 
@@ -41,6 +50,13 @@ except ImportError:  # backwards compatibility
                     return os.path.join(path, file)
 
         return None
+
+    def partition(pred, iterable):
+        'Use a predicate to partition entries into false and true entries'
+        # partition(is_odd, range(10)) --> 0 2 4 6 8   and  1 3 5 7 9
+        # https://docs.python.org/dev/library/itertools.html#itertools-recipes
+        t1, t2 = itertools.tee(iterable)
+        return itertools.ifilterfalse(pred, t1), itertools.ifilter(pred, t2)
 
 
 ##
@@ -118,28 +134,6 @@ class TBRunner:
         return (TBRunner.FORK_SHELL + cmd)
 
     ##
-    ## @brief      Preprocessing: determine some info about the calling
-    ##             environment
-    ##
-    def prepare_runtime(self):
-        repo_root = subprocess.Popen(["git", "rev-parse", "--show-toplevel"],
-                                     stdout=subprocess.PIPE,
-                                     universal_newlines=True)
-        repo_root_outp, _ = repo_root.communicate()
-        if repo_root.returncode:
-            prog_name = os.path.basename(__file__)
-            print("ERROR:", prog_name, "must be run from within 349 git repo",
-                  file=sys.stderr)
-            sys.exit(128)
-
-        proj_root = repo_root_outp.strip()
-        make_root = os.path.join(proj_root, "code")
-        self.make_cmd = [TBRunner.MAKER, "-C", make_root]
-
-        kernel_dpaths = glob(os.path.join(make_root, "kernel*"))
-        self.proj_names = list(map(os.path.basename, kernel_dpaths))
-
-    ##
     ## @brief      Wait for OpenOCD to be ready to connect to GDB.
     ## @param      stdout  A file-like obj for OpenOCD's stdout
     ##
@@ -161,6 +155,34 @@ class TBRunner:
         return -1
 
     ##
+    ## @brief      Preprocessing: determine some info about the calling
+    ##             environment
+    ##
+    def prepare_runtime(self):
+        # setup make command
+        repo_root = subprocess.Popen(["git", "rev-parse", "--show-toplevel"],
+                                     stdout=subprocess.PIPE,
+                                     universal_newlines=True)
+        repo_root_outp, _ = repo_root.communicate()
+        if repo_root.returncode:
+            prog_name = os.path.basename(__file__)
+            print("ERROR:", prog_name, "must be run from within 349 git repo",
+                  file=sys.stderr)
+            sys.exit(128)
+
+        proj_root = repo_root_outp.strip()
+        make_root = os.path.join(proj_root, "code")
+        self.make_cmd = [TBRunner.MAKER, "-C", make_root]
+
+        # collect possible things to make
+        makeable_fpaths = glob(os.path.join(make_root, "*/config.mk"))
+        makeable_dpaths = map(os.path.dirname, makeable_fpaths)
+        makeable_dnames = map(os.path.basename, makeable_dpaths)
+        u_p = partition(lambda d: d.startswith("kernel"), makeable_dnames)
+        self.uproj_names = list(u_p[0])
+        self.proj_names = list(u_p[1])
+
+    ##
     ## @brief      Parse argument vector.
     ## @param      argv  The argv, without the currently running
     ##                   filename (generally argv[0])
@@ -175,6 +197,8 @@ class TBRunner:
         ap.add_argument("-p", "--project", default="kernel",
                         choices=self.proj_names,
                         help="specify PROJECT variable to make")
+        ap.add_argument("-u", "--user-proj", choices=self.uproj_names,
+                        help="specify USER_PROJ variable to make")
         self.args = ap.parse_args(argv)
 
     ##
@@ -202,8 +226,11 @@ class TBRunner:
         # OpenOCD
         self.openocd_cmd = ["sudo"] + self.make_cmd + ["openocd"]
         # GDB
-        base_cmd = self.make_cmd + ["PROJECT=" + self.args.project, "gdb"]
-        self.gdb_cmd = self.newshell(base_cmd)
+        base_cmd = self.make_cmd
+        base_cmd += ["PROJECT=" + self.args.project]
+        if self.args.user_proj:
+            base_cmd += ["USER_PROJ=" + self.args.user_proj]
+        self.gdb_cmd = self.newshell(base_cmd + ["gdb"])
 
     def run(self):
         ftditerm_p = subprocess.Popen(self.ftditerm_cmd)
