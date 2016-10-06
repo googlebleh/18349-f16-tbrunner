@@ -229,7 +229,8 @@ class TBRunner:
         # OpenOCD
         self.openocd_cmd = ["sudo"] + self.make_cmd + ["openocd"]
         # GDB
-        base_cmd = self.make_cmd + ["PROJECT=" + self.args.project]
+        base_cmd = self.make_cmd
+        base_cmd += ["PROJECT=" + self.args.project]
         if self.args.user_proj:
             base_cmd += ["USER_PROJ=" + self.args.user_proj]
         self.gdb_cmd = self.newshell(base_cmd + ["gdb"])
