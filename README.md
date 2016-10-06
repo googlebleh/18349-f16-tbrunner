@@ -11,7 +11,9 @@ Prerequisites
 Install
 -------
 (todo: improve)
+
 Option 1: add script location to `PATH`
+
 Option 2: save it somewhere easy to access, so you can specify the path
 when you run it from anywhere the 349 repo tree
 
