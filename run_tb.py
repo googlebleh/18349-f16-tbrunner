@@ -192,11 +192,14 @@ class TBRunner:
         ap = ArgumentParser(description=long_desc)
         # ap.add_argument("-f", "--no-ftdi", action="store_true",
         #                 help="Don't start a new FTDITerm session")
+        #
         ap.add_argument("-l", "--logfile",
                         help="UNIMPLEMENTED: Write ftditerm output to file.")
+
         ap.add_argument("-p", "--project", default="kernel",
                         choices=self.proj_names,
                         help="specify PROJECT variable to make")
+
         ap.add_argument("-u", "--user-proj", choices=self.uproj_names,
                         help="specify USER_PROJ variable to make")
         self.args = ap.parse_args(argv)
