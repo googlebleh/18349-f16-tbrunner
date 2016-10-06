@@ -20,13 +20,14 @@
 from __future__ import print_function
 from __future__ import unicode_literals  # target may have funky pathnames
 
-import sys
-import os
 import atexit
-import time
-import re
+import copy
 import itertools  # different between Python 2 and 3
+import os
+import re
 import subprocess
+import sys
+import time
 from argparse import ArgumentParser
 from glob import glob
 
@@ -229,11 +230,12 @@ class TBRunner:
         # OpenOCD
         self.openocd_cmd = ["sudo"] + self.make_cmd + ["openocd"]
         # GDB
-        base_cmd = self.make_cmd
-        base_cmd += ["PROJECT=" + self.args.project]
+        base_cmd = copy.copy(self.make_cmd)
+        base_cmd.append("PROJECT=" + self.args.project)
         if self.args.user_proj:
-            base_cmd += ["USER_PROJ=" + self.args.user_proj]
-        self.gdb_cmd = self.newshell(base_cmd + ["gdb"])
+            base_cmd.append("USER_PROJ=" + self.args.user_proj)
+        base_cmd.append("gdb")
+        self.gdb_cmd = self.newshell(base_cmd)
 
     def run(self):
         ftditerm_p = subprocess.Popen(self.ftditerm_cmd)
