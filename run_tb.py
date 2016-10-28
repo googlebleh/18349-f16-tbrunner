@@ -197,12 +197,15 @@ class TBRunner:
         ap.add_argument("-l", "--logfile",
                         help="UNIMPLEMENTED: Write ftditerm output to file.")
 
+        help_fmt = "specify PROJECT variable to make as one of: {{{}}}"
         ap.add_argument("-p", "--project", default="kernel",
-                        choices=self.proj_names,
-                        help="specify PROJECT variable to make")
+                        choices=self.proj_names, metavar="",
+                        help=help_fmt.format(", ".join(self.proj_names)))
 
+        help_fmt = "specify USER_PROJ variable to make as one of: {{{}}}"
         ap.add_argument("-u", "--user-proj", choices=self.uproj_names,
-                        help="specify USER_PROJ variable to make")
+                        metavar="",
+                        help=help_fmt.format(", ".join(self.uproj_names)))
         self.args = ap.parse_args(argv)
 
     ##
