@@ -191,8 +191,13 @@ class TBRunner:
     def parse_args(self, argv):
         long_desc = "Run the testbench for 18-349's RPi/JTAG setup."
         ap = ArgumentParser(description=long_desc)
+
+        ap.add_argument("-c", "--clean-all", action="store_true",
+                        help="clean all make targets (don't run TB)")
+
         # ap.add_argument("-f", "--no-ftdi", action="store_true",
         #                 help="Don't start a new FTDITerm session")
+        #
         #
         ap.add_argument("-l", "--logfile",
                         help="UNIMPLEMENTED: Write ftditerm output to file.")
@@ -232,15 +237,30 @@ class TBRunner:
         self.ftditerm_cmd = ["sudo"] + self.newshell(base_cmd)
         # OpenOCD
         self.openocd_cmd = ["sudo"] + self.make_cmd + ["openocd"]
-        # GDB
-        base_cmd = copy.copy(self.make_cmd)
-        base_cmd.append("PROJECT=" + self.args.project)
-        if self.args.user_proj:
-            base_cmd.append("USER_PROJ=" + self.args.user_proj)
-        base_cmd.append("gdb")
-        self.gdb_cmd = self.newshell(base_cmd)
+        # MAKE / GDB
+        if self.args.clean_all:
+            self.clean_cmds = [(copy.copy(self.make_cmd)
+                                + ["PROJECT="+p, "USER_PROJ="+u, "clean"])
+                               for u in self.uproj_names
+                               for p in self.proj_names]
+            self.gdb_cmd = None
+        else:
+            base_cmd = copy.copy(self.make_cmd)
+            base_cmd.append("PROJECT=" + self.args.project)
+            if self.args.user_proj:
+                base_cmd.append("USER_PROJ=" + self.args.user_proj)
+            base_cmd.append("gdb")
+
+            self.gdb_cmd = self.newshell(base_cmd)
+            self.clean_cmds = None
 
     def run(self):
+        if self.args.clean_all:
+            for cmd in self.clean_cmds:
+                p = subprocess.Popen(cmd)
+                p.wait()
+            return
+
         ftditerm_p = subprocess.Popen(self.ftditerm_cmd)
         openocd_p = subprocess.Popen(self.openocd_cmd,
                                      stdout=subprocess.PIPE,
