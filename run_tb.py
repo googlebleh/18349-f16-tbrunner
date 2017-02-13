@@ -180,8 +180,8 @@ class TBRunner:
         makeable_dpaths = map(os.path.dirname, makeable_fpaths)
         makeable_dnames = map(os.path.basename, makeable_dpaths)
         u_p = partition(lambda d: d.startswith("kernel"), makeable_dnames)
-        self.uproj_names = list(u_p[0])
-        self.proj_names = list(u_p[1])
+        self.uproj_names = sorted(list(u_p[0]))
+        self.proj_names = sorted(list(u_p[1]))
 
     ##
     ## @brief      Parse argument vector.
